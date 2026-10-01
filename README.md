@@ -300,7 +300,7 @@ retained, so which folding it used is not documented.
 
 | Component | Version |
 |---|---|
-| FINN | v0.10.x |
+| FINN | v0.10.1 |
 | Vivado / Vitis HLS | 2022.2 |
 | Python | 3.10 |
 | PyTorch | 1.13.1+cu116 |
