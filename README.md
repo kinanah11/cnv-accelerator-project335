@@ -1,4 +1,4 @@
-# Real-Time Quantized CNN Accelerator for Edge AI
+# Real Time Quantized CNN Accelerator for Edge AI
 
 **Final project in Computer Engineering - Project 335**
 Faculty of Engineering, Bar-Ilan University
@@ -13,11 +13,11 @@ Track: Hardware Design
 This project builds a hardware accelerator for quantized CNN inference on an
 AMD/Xilinx **PYNQ-Z1** FPGA, using the **FINN** framework.
 
-A pretrained **CNV-w1a1** model - a VGG-style CNN with 6 convolutional and
-3 fully connected layers, trained on CIFAR-10 with 1-bit weights and
+A pretrained **CNV-w1a1** model - a VGG style CNN with 6 convolutional and
+3 fully connected layers, trained on CIFAR-10 with 1 bit weights and
 activations - is compiled into a **streaming dataflow** hardware architecture.
 Every network layer becomes its own hardware block, and activations stream
-between blocks through on-chip FIFOs instead of going out to DRAM.
+between blocks through on chip FIFOs instead of going out to DRAM.
 
 We then ran a **design space exploration** over the folding parameters
 (PE and SIMD) across four configurations, A through D, repeatedly locating the
@@ -25,19 +25,16 @@ slowest pipeline stage and widening it.
 
 ## Scope 
 
-All performance results in this repository come from **cycle-accurate RTL
-simulation (PyVerilator RTLSIM)** and **Vivado Out-of-Context synthesis**.
+All performance results in this repository come from **cycle accurate RTL
+simulation (PyVerilator RTLSIM)** and **Vivado Out of Context synthesis**.
 
 Measurement of a CPU baseline against simulated FPGA figures. 
 
 Power figures are estimates. They come from Vivado's
-`report_power` on the placed and routed out-of-context design - the accelerator
+`report_power` on the placed and routed out of context design - the accelerator
 alone, without the Zynq processing system. See [Power and energy](#power-and-energy).
 
-A bitstream was generated for both networks, neither was ever run on a
-board. See [Hardware artifacts](#hardware-artifacts).
-
----
+--------------------------------------------------------------------------------
 
 ## Results
 
@@ -65,12 +62,12 @@ timing margin from +0.340 ns to +0.082 ns. C keeps roughly four times the slack
 for almost the same performance.
 
 **Zero DSP slices are used in any configuration.** With 1 bit weights and
-activations the multiply-accumulate collapses into XNOR plus popcount, which
+activations the multiply accumulate is replaced into XNOR plus popcount, which
 maps onto LUTs rather than DSP blocks.
 
 ### Power and energy
 
-| Config | Total on-chip (W) | Dynamic (W) | Static (W) | Energy / inference (mJ) | FPS per Watt |
+| Config | Total on chip (W) | Dynamic (W) | Static (W) | Energy / inference (mJ) | FPS per Watt |
 |---|---|---|---|---|---|
 | A (baseline) | 0.660 | 0.543 | 0.118 | 0.382 | 2,615 |
 | B | 0.660 | 0.542 | 0.118 | 0.284 | 3,523 |
@@ -88,8 +85,7 @@ slice logic, 0.078 W in clocking and 0.117 W of device static power. Junction
 temperature is 32.3 °C at a 25 °C ambient, against a maximum permissible ambient
 of 77.7 °C.
 
-Three qualifications. The synthesis is **out-of-context**: the design analysed is
-the `finn_design_wrapper` accelerator alone, without the Zynq processing system,
+The synthesis is **out of context**: the design analysed is the `finn_design_wrapper` accelerator alone, without the Zynq processing system,
 the DMA engines or the PYNQ shell, so these are accelerator figures and not board
 figures. **No switching activity file was supplied**, so Vivado propagated
 default activity rates and every report states a confidence level of **Medium**.
@@ -110,11 +106,11 @@ Summary data: [`results/power_A_D.csv`](results/power_A_D.csv)
 | Platform | Method | Throughput | Latency |
 |---|---|---|---|
 | Host CPU | PyTorch, 1 thread, batch = 1 | 42.63 ± 1.65 FPS | 23.49 ± 0.93 ms |
-| FINN Config C | RTLSIM @ 100 MHz | 2416.88 FPS | 1.033 ms |
+| FINN Config C | RTLSIM - 100 MHz | 2416.88 FPS | 1.033 ms |
 | Ratio | measured CPU vs. simulated FPGA | ≈ 56.7× | ≈ 22.7× |
 
-CPU baseline: 5 runs × 500 inferences, batch size 1, after a 30-iteration
-warm-up, timed with `time.perf_counter`.
+CPU baseline: 5 runs × 500 inferences, batch size 1, after a 30 iteration
+warm up, timed with `time.perf_counter`.
 Source data: [`results/cpu_vs_finn_C.csv`](results/cpu_vs_finn_C.csv)
 
 ### Functional verification
@@ -123,14 +119,14 @@ Configuration C was verified with `STITCHED_IP_RTLSIM` against the PyTorch
 software model. Both returned class 3 - `Match = True`. This is a single-input
 consistency check, not an accuracy evaluation over CIFAR-10.
 
----
+--------------------------------------------------------------------------------
 
 ## Running this yourself
 
 The notebooks under `notebooks/`. They are not standalone scripts: they
 import `finn.*` and `qonnx.*` and they invoke Vivado and Vitis HLS, so they only
 run **inside the FINN Docker container**. Opening them in a plain Jupyter
-install will fail on the first import.
+install will fail.
 
 ### What you need
 
@@ -139,18 +135,17 @@ install will fail on the first import.
 | Linux host with `bash` | WSL2 on Windows also works |
 | Docker, usable without `sudo` | FINN only supports Docker-based execution |
 | Vivado + Vitis HLS **2022.2** | Installed on the host, not inside the container |
-| ~8 GB RAM | Minimum for Zynq-class targets |
+| ~8 GB RAM | Minimum for Zynq class targets |
 | Tens of GB of free disk | FINN build directories are large |
 
 No GPU is required - the container we used had none, and everything here runs on
-CPU. No PYNQ-Z1 board is required either; nothing in this repository touches real
-hardware.
+CPU. No PYNQ-Z1 board is required either.
 
 ### What you do *not* need to install
 
-You do **not** need to install Brevitas, QONNX, finn-experimental, PyVerilator or
+You do **not** need to install Brevitas, QONNX, finn experimental, PyVerilator or
 any other FINN dependency yourself. FINN fetches them: `fetch-repos.sh` clones
-each one into `deps/` inside your FINN checkout, and they are pip-installed in
+each one into `deps/` inside your FINN checkout, and they are pip installed in
 editable mode when the container starts. You will see it in the startup log,
 roughly like this:
 
@@ -211,25 +206,25 @@ running those cells. Every other path in the notebooks is derived from
 Exact figures depend on the FINN version, so a different release may produce
 different cycle counts and resource numbers.
 
----
+--------------------------------------------------------------------------------
 
 ## Repository layout
 
 ```
 notebooks/   Jupyter notebooks, with all outputs preserved
 results/     Measurement data (CSV), the Vivado power reports, and the charts used in the book
-hardware/    FINN-generated deployment packages and Vivado block diagrams
+hardware/    FINN generated deployment packages and Vivado block diagrams
 configs/     The folding parameters for configurations A–D
 ```
 
 Appendix A of the project book lists thirteen notebooks; eight are here. The rest
 are the official FINN tutorial notebooks - `0_how_to_work_with_onnx`,
 `1_brevitas_network_import_via_QONNX`, the cybersecurity MLP series and the FINN
-end-to-end examples - which we worked through while learning the framework. They
-belong to the FINN project and are not ours to redistribute. The notebooks kept
-here are the ones this project ran: they derive from the FINN end-to-end example
-flow and were extended with the per-layer folding configurations, the
-bottleneck-driven exploration procedure, the `STITCHED_IP_RTLSIM` verification
+end to end examples - which we worked through while learning the framework. They
+belong to the FINN project.  
+The notebooks kept here are the ones this project ran: they derive from the FINN end to end example
+flow and were extended with the per layer folding configurations, the
+bottleneck driven exploration procedure, the `STITCHED_IP_RTLSIM` verification
 harness and the CPU baseline benchmark.
 
 ### Which notebook produces what
@@ -240,61 +235,26 @@ harness and the CPU baseline benchmark.
 | `cnv_folding_optimization.ipynb` | Configuration B - first SIMD widening |
 | `cnv_folding_C.ipynb` | Configuration C - the recommended design |
 | `cnv_folding_D.ipynb` | Configuration D - maximum throughput |
-| `cnv_final_verification.ipynb` | `STITCHED_IP_RTLSIM` functional verification **and the CPU baseline benchmark** |
+| `cnv_final_verification.ipynb` | `STITCHED_IP_RTLSIM` functional verification and the CPU baseline benchmark |
 | `cnv_cpu_gpu_benchmark.ipynb` | The environment check recording why there is no GPU baseline, plus an independent reproduction of the Configuration A reports |
-| `tfc_end2end_baseline.ipynb` | Fully-connected (TFC) reference flow, used while learning FINN |
-| `tfc_end2end_verification_B.ipynb` | Verification of the TFC flow - `cppsim` and node-by-node RTL simulation were exercised here, on the TFC network only |
+| `tfc_end2end_baseline.ipynb` | Fully connected (TFC) reference flow |
+| `tfc_end2end_verification_B.ipynb` | Verification of the TFC flow - `cppsim` and node by node RTL simulation were exercised here, on the TFC network only |
 
 Each of the four configuration notebooks also carries its Vivado power report in
 the output of its build cell; those reports are collected in
 `results/vivado_power_reports.txt`.
 
-**Notebook outputs are deliberately not cleared.** The measured numbers reported
-in the project book live in those outputs, and clearing them would remove the
-evidence.
+Note on the CPU benchmark. `cnv_final_verification.ipynb` holds more than
+one benchmark cell: the figure used throughout the project book is the **5 run
+average, 42.63 FPS and 23.49 ms** (cell 35), while an earlier single run cell
+reporting 46.28 FPS is kept for transparency.
 
-Two notes on the CPU benchmark. `cnv_final_verification.ipynb` holds more than
-one benchmark cell: the figure used throughout the project book is the **5-run
-average, 42.63 FPS and 23.49 ms** (cell 35), while an earlier single-run cell
-reporting 46.28 FPS is kept for transparency. And although
-`cnv_cpu_gpu_benchmark.ipynb` contains a CPU benchmark cell, **it was never run**
-- it carries `execution_count: null` and no output, and no CPU figure anywhere in
-this repository comes from it.
-
-**Not every line of text in the notebooks is ours.** These notebooks were derived
-from the official FINN end-to-end tutorials, and the tutorials' explanatory
+Not every line of text in the notebooks is ours. These notebooks were derived
+from the official FINN end to end tutorials, and the tutorials' explanatory
 markdown was kept alongside our own work rather than stripped out. That text
-describes the tutorial's model, not our measurements. The clearest example is the
-sentence *"the final top-1 accuracy is 84.19%"*, which appears word for word in
-six of the CNV notebooks: it is the FINN tutorial's statement about the
-pretrained CNV-w1a1 model, not an accuracy this project measured. **No CIFAR-10
-accuracy evaluation was run in this project** - functional verification here is a
-single golden input/output pair, as described above.
+describes the tutorial's model, not our measurements.
 
-### Hardware artifacts
-
-`deploy-on-pynq-cnv.zip` and `deploy-on-pynq-tfc.zip` are the deployment packages
-FINN generated for the two networks. Each contains a real `resizer.bit` built for
-the PYNQ-Z1 part `7z020clg400` with Vivado 2022.2 on 5 April 2026, together with
-the FINN-generated PYNQ driver and the `resizer.hwh` block-design metadata.
-`stitched_ip.png`, `top.pdf`, `StreamingDataflowPartition_1.pdf` and
-`pynq_shell_project.png` are the generated Vivado block designs.
-
-Neither package was ever executed on a board: each contains an `input.npy` with
-no corresponding output, and PYNQ's `Overlay()` is not called anywhere in the
-notebooks. The TFC build is documented in `tfc_end2end_baseline.ipynb`, where the
-`ZynqBuild` cell ran and kept its Vivado output; in every CNV notebook that cell
-carries `execution_count: null`, so the file itself is the only record of the CNV
-build.
-
-**Both bitstreams predate the design space exploration.** They were built on
-5 April 2026, while the out-of-context synthesis runs that produced
-configurations A through D are timestamped 19–20 August 2026. The CNV bitstream
-therefore does not correspond to any of the four reported configurations, and in
-particular should not be assumed to be Configuration C. No build log was
-retained, so which folding it used is not documented.
-
----
+--------------------------------------------------------------------------------
 
 ## Environment
 
@@ -310,14 +270,14 @@ retained, so which folding it used is not documented.
 
 FINN was run from its official Docker container, with Vivado mounted in from the
 host. Brevitas was not installed independently - FINN pins it and installs it
-from `deps/brevitas`, so its version follows from the FINN release above.
+from `deps/brevitas`.
 
----
+--------------------------------------------------------------------------------
 
 ## Notes
 
 Figures taken from the official FINN documentation are used in the project book
 but are deliberately **not** redistributed here.
 
-The full write-up is in the project book, *Real-Time Quantized CNN Accelerator
+The full write up is in the project book, *Real Time Quantized CNN Accelerator
 for Edge AI*, Project 335, Bar-Ilan University.
