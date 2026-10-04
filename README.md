@@ -34,7 +34,7 @@ Power figures are estimates. They come from Vivado's
 `report_power` on the placed and routed out of context design - the accelerator
 alone, without the Zynq processing system. See [Power and energy](#power-and-energy).
 
---------------------------------------------------------------------------------
+---
 
 ## Results
 
@@ -116,10 +116,10 @@ Source data: [`results/cpu_vs_finn_C.csv`](results/cpu_vs_finn_C.csv)
 ### Functional verification
 
 Configuration C was verified with `STITCHED_IP_RTLSIM` against the PyTorch
-software model. Both returned class 3 - `Match = True`. This is a single-input
-consistency check, not an accuracy evaluation over CIFAR-10.
+software model. Both returned class 3 - `Match = True`. This is a single input
+consistency check.
 
---------------------------------------------------------------------------------
+---
 
 ## Running this yourself
 
@@ -133,7 +133,7 @@ install will fail.
 | Requirement | Notes |
 |---|---|
 | Linux host with `bash` | WSL2 on Windows also works |
-| Docker, usable without `sudo` | FINN only supports Docker-based execution |
+| Docker, usable without `sudo` | FINN only supports Docker based execution |
 | Vivado + Vitis HLS **2022.2** | Installed on the host, not inside the container |
 | ~8 GB RAM | Minimum for Zynq class targets |
 | Tens of GB of free disk | FINN build directories are large |
@@ -206,7 +206,7 @@ running those cells. Every other path in the notebooks is derived from
 Exact figures depend on the FINN version, so a different release may produce
 different cycle counts and resource numbers.
 
---------------------------------------------------------------------------------
+---
 
 ## Repository layout
 
@@ -254,7 +254,7 @@ from the official FINN end to end tutorials, and the tutorials' explanatory
 markdown was kept alongside our own work rather than stripped out. That text
 describes the tutorial's model, not our measurements.
 
---------------------------------------------------------------------------------
+---
 
 ## Environment
 
@@ -272,7 +272,7 @@ FINN was run from its official Docker container, with Vivado mounted in from the
 host. Brevitas was not installed independently - FINN pins it and installs it
 from `deps/brevitas`.
 
---------------------------------------------------------------------------------
+---
 
 ## Notes
 
