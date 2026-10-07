@@ -81,9 +81,7 @@ recommendation of C, argued above on timing margin and resource cost, holds
 independently on the energy axis.
 
 For C the breakdown is 0.165 W in Block RAM, 0.149 W in signals, 0.123 W in
-slice logic, 0.078 W in clocking and 0.117 W of device static power. Junction
-temperature is 32.3 °C at a 25 °C ambient, against a maximum permissible ambient
-of 77.7 °C.
+slice logic, 0.078 W in clocking and 0.117 W of device static power.
 
 The synthesis is **out of context**: the design analysed is the `finn_design_wrapper` accelerator alone, without the Zynq processing system,
 the DMA engines or the PYNQ shell, so these are accelerator figures and not board
