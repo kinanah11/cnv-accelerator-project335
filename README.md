@@ -23,12 +23,12 @@ We then ran a **design space exploration** over the folding parameters
 (PE and SIMD) across four configurations, A through D, repeatedly locating the
 slowest pipeline stage and widening it.
 
-## Scope 
+## Scope
 
 All performance results in this repository come from **cycle accurate RTL
 simulation (PyVerilator RTLSIM)** and **Vivado Out of Context synthesis**.
 
-Measurement of a CPU baseline against simulated FPGA figures. 
+A measured single thread CPU baseline is compared with simulated FPGA performance. 
 
 Power figures are estimates. They come from Vivado's
 `report_power` on the placed and routed out of context design - the accelerator
@@ -62,7 +62,7 @@ timing margin from +0.340 ns to +0.082 ns. C keeps roughly four times the slack
 for almost the same performance.
 
 **Zero DSP slices are used in any configuration.** With 1 bit weights and
-activations the multiply accumulate is replaced into XNOR plus popcount, which
+activations operation is implemented using XNOR and popcount, which
 maps onto LUTs rather than DSP blocks.
 
 ### Power and energy
@@ -81,9 +81,7 @@ recommendation of C, argued above on timing margin and resource cost, holds
 independently on the energy axis.
 
 For C the breakdown is 0.165 W in Block RAM, 0.149 W in signals, 0.123 W in
-slice logic, 0.078 W in clocking and 0.117 W of device static power. Junction
-temperature is 32.3 °C at a 25 °C ambient, against a maximum permissible ambient
-of 77.7 °C.
+slice logic, 0.078 W in clocking and 0.117 W of device static power.
 
 The synthesis is **out of context**: the design analysed is the `finn_design_wrapper` accelerator alone, without the Zynq processing system,
 the DMA engines or the PYNQ shell, so these are accelerator figures and not board
@@ -133,13 +131,13 @@ install will fail.
 | Requirement | Notes |
 |---|---|
 | Linux host with `bash` | WSL2 on Windows also works |
-| Docker, usable without `sudo` | FINN only supports Docker based execution |
+| Docker, usable without `sudo` | This project was developed and tested using FINN’s Docker based workflow |
 | Vivado + Vitis HLS **2022.2** | Installed on the host, not inside the container |
 | ~8 GB RAM | Minimum for Zynq class targets |
 | Tens of GB of free disk | FINN build directories are large |
 
 No GPU is required - the container we used had none, and everything here runs on
-CPU. No PYNQ-Z1 board is required either.
+CPU. No PYNQ-Z1 board is required to reproduce the simulation and OOC synthesis results reported here; a physical board is required only for hardware deployment.
 
 ### What you do *not* need to install
 
@@ -169,7 +167,7 @@ export FINN_XILINX_VERSION=2022.2
 # 2. Get FINN, at the version this project used
 git clone https://github.com/Xilinx/finn
 cd finn
-git checkout v0.10
+git checkout v0.10.1
 
 # 3. Start the notebook server inside the container
 bash ./run-docker.sh notebook
@@ -217,15 +215,9 @@ hardware/    FINN generated deployment packages and Vivado block diagrams
 configs/     The folding parameters for configurations A–D
 ```
 
-Appendix A of the project book lists thirteen notebooks; eight are here. The rest
-are the official FINN tutorial notebooks - `0_how_to_work_with_onnx`,
-`1_brevitas_network_import_via_QONNX`, the cybersecurity MLP series and the FINN
-end to end examples - which we worked through while learning the framework. They
-belong to the FINN project.  
-The notebooks kept here are the ones this project ran: they derive from the FINN end to end example
-flow and were extended with the per layer folding configurations, the
-bottleneck driven exploration procedure, the `STITCHED_IP_RTLSIM` verification
-harness and the CPU baseline benchmark.
+Appendix A of the project book lists thirteen notebooks in total. Eight project-specific notebooks are included in this repository; the remaining five are unmodified official FINN tutorials and are therefore not redistributed here.
+`0_how_to_work_with_onnx`, `1_brevitas_network_import_via_QONNX`, the cybersecurity MLP series and the FINN end to end examples - which we worked through while learning the framework, They belong to the FINN project.  
+The notebooks kept here are the ones this project ran: they derive from the FINN end to end example flow and were extended with the per layer folding configurations, the bottleneck driven exploration procedure, the `STITCHED_IP_RTLSIM` verification harness and the CPU baseline benchmark.
 
 ### Which notebook produces what
 
@@ -264,7 +256,7 @@ describes the tutorial's model, not our measurements.
 | Vivado / Vitis HLS | 2022.2 |
 | Python | 3.10 |
 | PyTorch | 1.13.1+cu116 |
-| Brevitas | as pinned by FINN v0.10, installed from `deps/brevitas` |
+| Brevitas| v0.10.0, pinned by FINN and installed from `deps/brevitas` |
 | Target board | AMD/Xilinx PYNQ-Z1 (XC7Z020-CLG400) |
 | Clock target | 100 MHz (10 ns) |
 
